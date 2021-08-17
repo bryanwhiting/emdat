@@ -1,0 +1,45 @@
+---
+title: "EM-DAT"
+author: "Bryan Whiting"
+date: "8/17/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+easypackages::libraries('readxl', 'dplyr', 'ggplot2', 'gt')
+theme_set(ggthemes::theme_fivethirtyeight())
+```
+```{r}
+# Source: https://public.emdat.be/data
+# All Natural, 2001-2021, all countries
+path <- "/home/rstudio/data/emdat/emdat_public_2021_08_17_query_uid-84GUwE.xlsx"
+# data starts on 6th row
+df_raw <- read_excel(path, skip=6)
+```
+
+Clean data:
+```{r}
+df <- df_raw %>% 
+  janitor::clean_names() %>%
+    mutate(year = as.numeric(year))
+```
+
+# Disasters by year
+```{r}
+df_tmp <- df %>%
+  count(year) 
+
+df_tmp %>%
+  ggplot(aes(x = year, y = n)) +
+  geom_point() +
+  geom_smooth(color='black') +
+  labs(
+    title = 'Count of global natural disasters over time',
+    caption = 'Source: EM-DAT database',
+    y = '',
+    x = ''
+  ) 
+  
+```
+
