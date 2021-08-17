@@ -1,45 +1,76 @@
 ---
-title: "EM-DAT"
+title: "EM-DAT Analysis"
+subtitle: "How many disasters have there been?"
 author: "Bryan Whiting"
 date: "8/17/2021"
-output: html_document
+output: 
+  bookdown::html_document2:
+    df_print: paged
+    code_folding: hide
+    toc: true
+    toc_float: true
+    number_sections: true
+    theme: united
+    highlight: tango
+    fig_caption: true
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-easypackages::libraries('readxl', 'dplyr', 'ggplot2', 'gt')
+```{r setup, include=FALSE, warning=FALSE, message=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  warning = FALSE,
+  message = FALSE
+)
+easypackages::libraries("readxl", "dplyr", "ggplot2", "gt")
 theme_set(ggthemes::theme_fivethirtyeight())
 ```
-```{r}
+
+```{r read_df}
+# Load data
 # Source: https://public.emdat.be/data
 # All Natural, 2001-2021, all countries
 path <- "/home/rstudio/data/emdat/emdat_public_2021_08_17_query_uid-84GUwE.xlsx"
 # data starts on 6th row
-df_raw <- read_excel(path, skip=6)
+df_raw <- read_excel(path, skip = 6)
+df <- df_raw %>%
+  janitor::clean_names() %>%
+  mutate(year = as.numeric(year))
 ```
 
-Clean data:
-```{r}
-df <- df_raw %>% 
-  janitor::clean_names() %>%
-    mutate(year = as.numeric(year))
-```
+I want to understand if disasters are increase (as they seem to be). The EM-DAT database collects major natural disasters recorded across the world. Not sure if this is the 
+best dataset, or if it's the most complete. Also, there's selection bias in what
+gets recorded. Also, I'm not an expert on this dataset, so my conclusions could 
+be wrong. Poke around for yourself.
 
 # Disasters by year
 ```{r}
 df_tmp <- df %>%
-  count(year) 
+  count(year)
 
 df_tmp %>%
   ggplot(aes(x = year, y = n)) +
   geom_point() +
-  geom_smooth(color='black') +
+  geom_smooth(color = "black") +
   labs(
-    title = 'Count of global natural disasters over time',
-    caption = 'Source: EM-DAT database',
-    y = '',
-    x = ''
-  ) 
-  
+    title = "Count of global natural disasters over time",
+    subtitle = "Seem to be trending downward?",
+    caption = "Source: EM-DAT database",
+    y = "",
+    x = ""
+  )
 ```
 
+# Disasters by subgroup
+```{r}
+df %>%
+  count(year, disaster_subgroup) %>%
+  ggplot(aes(x = year, y = n, fill = disaster_subgroup)) +
+  geom_bar(stat = "identity") +
+  labs(
+    title = "Disasters by Group",
+    fill = "Sub Group",
+    caption = "Source: EM-DAT database"
+  )
+
+a <- 10
+```
